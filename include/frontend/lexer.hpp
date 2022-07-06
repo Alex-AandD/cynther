@@ -1,7 +1,8 @@
 #pragma once
-#include <frontend/token.hpp>
+#include "frontend/token.hpp"
 #include <vector>
 #include <string>
+#include <unordered_map>
 
 class Lexer {
     /* current -> points to the current character examined
@@ -14,6 +15,8 @@ private:
     size_t line;
     std::vector<Token> tokens;
     std::string input_string;
+    static std::unordered_map<std::string, TOKENTYPE> keyword_map;
+
 public:
     Lexer(std::string input);
     ~Lexer();
@@ -25,9 +28,13 @@ public:
     char peek_next();
     bool at_end();
 
-    Token push_simple_token(TOKENTYPE);
-    Token push_int_token();
-    Token push_double_token();
-    Token push_string_token();
-    Token push_comment_token();
+    void push_simple_token(TOKENTYPE);
+    void push_number_token();
+    void push_int_token();
+    void push_double_token();
+    void push_string_token();
+    void push_id_token();
+    void push_comment_token();
+
+    void __repr__();
 };

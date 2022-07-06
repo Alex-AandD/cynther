@@ -6,9 +6,6 @@ Token::Token() { }
 Token::Token(TOKENTYPE _type, std::string _lex, size_t _line, size_t _offset)
     :type(_type), lexeme(_lex), line(_line), offset(_offset){}
 
-Token::~Token(){ }
-
-
 static std::string TOKENTYPE_to_str(TOKENTYPE type){
     switch(type){
 	case PLUS: return "PLUS";
@@ -29,13 +26,15 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
 	case DOUBLE: return "DOUBLE";
 	case BOOL: return "BOOL";
 	case STRING: return "STRING";
+	case FUNCTION: return "FUNCTION";
 	case EOF_: return "EOF";
+	case ID: return "ID";
 	default: return "UNKNOWN";
     }
 }
 
 void Token::__repr__(){
     std::cout << TOKENTYPE_to_str(type) << ' ';
-    std::cout << "lex:" << lexeme << ' ';
+    std::cout << lexeme << ' ';
     std::cout << line << ':' << offset << '\n';
 }

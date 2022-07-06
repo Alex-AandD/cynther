@@ -2,7 +2,9 @@
 #include <iostream>
 
 enum TOKENTYPE {
-    INT, DOUBLE, STRING, BOOL,
+    INT, DOUBLE, STRING, BOOL, FUNCTION, ID,
+    QUOTE,
+    IF, ELSE, WHILE, FOR,
     PLUS, MINUS, SLASH, COMMENT, TIMES, MODULO, 
     EQUAL, NOT_EQUAL, NOT, GT, LT, GTE, LTE, EQUAL_EQUAL,
     SEMICOLON, EOF_
@@ -17,7 +19,6 @@ class Token {
     public:
 	Token(TOKENTYPE, std::string lexeme, size_t line, size_t offset);
 	Token();
-	~Token();	
 
 	// visual representation of the token 
 	void __repr__();
