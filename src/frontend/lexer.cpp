@@ -2,8 +2,9 @@
 #include "frontend/lexer.hpp"
 #include "frontend/exceptions.hpp"
 
+Lexer::Lexer(): current(0), start(0), line(1), lexer_errors(0){ }
 Lexer::Lexer(std::string input):
-    input_string(input), start(0), current(0), line(1){ }
+    current(0), start(0), line(1), input_string(input), lexer_errors(0) { }
 
 Lexer::~Lexer(){ }
 
@@ -12,10 +13,10 @@ std::unordered_map<std::string, TOKENTYPE> Lexer::keyword_map = {
     {"else", ELSE}, 
     {"for", FOR}, 
     {"while", WHILE}, 
-    {"int", INT}, 
-    {"bool", BOOL}, 
-    {"string", STRING}, 
-    {"double", DOUBLE}, 
+    {"int", INT_TYPE}, 
+    {"bool", BOOL_TYPE}, 
+    {"string", STRING_TYPE}, 
+    {"double", DOUBLE_TYPE}, 
     {"fun", FUNCTION},
 };
 
@@ -37,8 +38,6 @@ bool static isname(char c){
 }
 
 std::vector<Token> Lexer::scan_tokens(){
-    std::cout << input_string.size();
-    if (input_string.size() == 0) return tokens;
     while(!at_end()){
 	start = current;
 	char c_char {input_string[current]};
@@ -51,13 +50,14 @@ std::vector<Token> Lexer::scan_tokens(){
 		case ';': push_simple_token(SEMICOLON); break;
 		case '=': match('=') ? push_simple_token(EQUAL_EQUAL) : push_simple_token(EQUAL); break;
 		case '+': push_simple_token(PLUS); break;
-		case '"': current++; push_string_token(); break;
+		case '"': start++;current++; push_string_token(); break;
 		case '-': push_simple_token(MINUS);break;
 		case '*': push_simple_token(TIMES);break;
 		case '/': match('/') ? push_comment_token() : push_simple_token(SLASH);break;
 		case '>': match('=') ? push_simple_token(GTE) : push_simple_token(GT);break;
 		case '<': match('=') ? push_simple_token(LTE) : push_simple_token(LT);break;
 		case '!': match('=') ? push_simple_token(NOT_EQUAL) : push_simple_token(NOT);break;
+		case '%': push_simple_token(MODULO);break;
 		default:
 			if (std::isdigit(c_char)){
 			    push_number_token();break;}
@@ -75,7 +75,7 @@ std::vector<Token> Lexer::scan_tokens(){
 
 void Lexer::push_simple_token(TOKENTYPE token_type)
 {	
-    auto token = Token(token_type, std::string(input_string[current], 1), line, current);
+    auto token = Token(token_type, std::string(1, input_string[current]), line, current);
     tokens.push_back(token); 
 }
 
@@ -92,7 +92,7 @@ void Lexer::push_number_token(){
     while(!at_end() && std::isdigit(input_string[current])){
 	current++;	
     }
-    if (input_string[current] == '.'){	
+    if (input_string[current] == '.'){
 	current++;
 	return push_double_token();
     }
@@ -101,19 +101,37 @@ void Lexer::push_number_token(){
 
 void Lexer::push_int_token()
 {
-    std::string lexeme = input_string.substr(start, current - start);
-    auto token = Token(INT, lexeme, line, current);
-    tokens.push_back(token);
+    try{
+	if (isname(input_string[current])){ 
+	    throw UndefinedLiteral("integer", input_string.substr(start, current -  start + 1),
+		  line, current);
+	}
+	std::string lexeme = input_string.substr(start, current - start);
+	auto token = Token(INT, lexeme, line, current);
+	tokens.push_back(token);
+    } catch(UndefinedLiteral& und){
+	und.print_error();
+	lexer_errors++;
+    }
+
+    current--;
 }
 
 void Lexer::push_double_token()
 {
-    while(!at_end() && std::isdigit(input_string[current])){
-	current++;
+    try {
+	while(!at_end() && std::isdigit(input_string[current])){
+	    current++;
+	}
+	std::string lexeme = input_string.substr(start, current - start);
+	auto token = Token(DOUBLE, lexeme, line, current);
+	tokens.push_back(token);
+
+    } catch(UndefinedLiteral& und){
+	und.print_error();
+	lexer_errors++;
     }
-    std::string lexeme = input_string.substr(start, current - start);
-    auto token = Token(DOUBLE, lexeme, line, current);
-    tokens.push_back(token);
+    current--;
 }
 
 void Lexer::push_string_token(){
@@ -125,23 +143,29 @@ void Lexer::push_string_token(){
     auto token = Token(STRING, lexeme, line, start); // using start, probably in the future both 
 						     // start and current will be needed to get 
 						     // better error handling.
+    tokens.push_back(token);
 }
 
 void Lexer::push_id_token()
 {
-   while(!at_end() && isname(input_string[current])){
-	current++;
-    }
+   try {
+       while(!at_end() && isname(input_string[current])){
+	    current++;
+	}
+	if (std::isdigit(input_string[current])){ 
+	    throw UndefinedLiteral("id", input_string.substr(start, current -  start + 1),
+				    line, current); }
 
-    std::string lexeme = input_string.substr(start, current - start);
-    auto keyword_it = keyword_map.find(lexeme);
-    if (keyword_it != keyword_map.end()){
-	tokens.push_back(Token(keyword_it -> second, lexeme, line, current));
-    } else {
-	tokens.push_back(Token(ID, lexeme, line, current));
-    }
-    // sub 1 from current or if there is a character attached to the end (e.g. int; a+) it's
-    // goint to get lost
+	std::string lexeme = input_string.substr(start, current - start);
+	auto keyword_it = keyword_map.find(lexeme);
+	if (keyword_it != keyword_map.end()){
+	    tokens.push_back(Token(keyword_it -> second, lexeme, line, current)); }
+	else {
+	    tokens.push_back(Token(ID, lexeme, line, current));}
+       } catch(UndefinedLiteral& und){
+	    und.print_error();
+	    lexer_errors++;
+       }
     current--;
 }
 
@@ -150,4 +174,20 @@ void Lexer::__repr__(){
     for (auto& token: tokens){
 	token.__repr__();
     }
+}
+
+std::vector<TOKENTYPE> Lexer::get_types() const {
+    std::vector<TOKENTYPE> vec;
+    for (auto& token: tokens){
+	vec.push_back(token.get_type());
+    }
+    return vec;
+}
+
+std::vector<std::string> Lexer::get_lexemes() const {
+    std::vector<std::string> vec;
+    for (auto& token: tokens){
+	vec.push_back(token.get_lexeme());
+    }
+    return vec;
 }

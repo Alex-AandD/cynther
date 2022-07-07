@@ -15,14 +15,19 @@ private:
     size_t line;
     std::vector<Token> tokens;
     std::string input_string;
+    int lexer_errors;
     static std::unordered_map<std::string, TOKENTYPE> keyword_map;
 
 public:
+    Lexer();
     Lexer(std::string input);
     ~Lexer();
 
+    void set_input_string(std::string new_input){
+	input_string = new_input; 
+	std::cout << "this is input_string now" << input_string <<'\n';
+    }
     std::vector<Token> scan_tokens();
-    void push_token(Token);
     
     bool match(char c);
     char peek_next();
@@ -37,4 +42,6 @@ public:
     void push_comment_token();
 
     void __repr__();
+    std::vector<TOKENTYPE> get_types() const;
+    std::vector<std::string> get_lexemes() const;
 };

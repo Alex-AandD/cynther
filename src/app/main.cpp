@@ -19,8 +19,13 @@ int main(int argc, char *argv[]){
     }
     file = fopen(filename, "r");
     size_t len = get_file_size(file);
-    if (len == 0) std::cout << "file is empty"; return 0;
-    char buffer[len]; 
+    if (len == 0) { 
+	std::cout << "file is empty"; 
+	return 0;
+    }
+
+    char buffer[len];
+    std::cout << buffer << '\n';
     fread(buffer, 1, len, file);
     std::string input_string{buffer};
 

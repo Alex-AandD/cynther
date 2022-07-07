@@ -3,6 +3,7 @@
 
 enum TOKENTYPE {
     INT, DOUBLE, STRING, BOOL, FUNCTION, ID,
+    INT_TYPE, DOUBLE_TYPE, STRING_TYPE, BOOL_TYPE,
     QUOTE,
     IF, ELSE, WHILE, FOR,
     PLUS, MINUS, SLASH, COMMENT, TIMES, MODULO, 
@@ -24,8 +25,8 @@ class Token {
 	void __repr__();
 
 	// some getters
-	inline std::string getLexeme() const { return lexeme; }
-	inline size_t getLine() const {return line;}
-	inline size_t getOffset() const {return offset;}
-	inline TOKENTYPE getType() const {return type;}
+	inline std::string get_lexeme() const { return lexeme; }
+	inline size_t get_line() const {return line;}
+	inline size_t get_offset() const {return offset;}
+	inline TOKENTYPE get_type() const {return type;}
 };

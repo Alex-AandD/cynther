@@ -21,6 +21,10 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
 	case GTE: return "GTE";
 	case LT: return "LT";
 	case LTE: return "LTE";
+	case INT_TYPE: return "INT_TYPE";
+	case STRING_TYPE: return "STRING_TYPE";
+	case BOOL_TYPE: return "BOOL_TYPE";
+	case DOUBLE_TYPE: return "DOUBLE_TYPE";
 	case NOT_EQUAL: return "NOT_EQUAL";
 	case INT: return "INT";
 	case DOUBLE: return "DOUBLE";
