@@ -10,11 +10,17 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
     switch(type){
 	case PLUS: return "PLUS";
 	case MINUS: return "MINUS";
+	case LEFT_BRACE: return "LEFT_BRACE";
+	case RIGHT_BRACE: return "RIGHT_BRACE";
+	case RIGHT_PAR: return "RIGHT_PAR";
+	case LEFT_PAR: return "LEFT_PAR";
 	case TIMES: return "TIMES";
+	case IF: return "IF";
 	case SLASH: return "SLASH";
 	case MODULO: return "MODULO";
 	case SEMICOLON: return "SEMICOLON";
 	case COMMENT: return "COMMENT";
+	case ARROW : return "ARROW";
 	case EQUAL: return "EQUAL";
 	case EQUAL_EQUAL: return "EQUAL_EQUAL";
 	case GT: return "GT";

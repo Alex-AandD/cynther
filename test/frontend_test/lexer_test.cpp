@@ -1,6 +1,14 @@
 #include "frontend/lexer.hpp"
 #include <gtest/gtest.h>
 
+/* REMEMBER!!!!! 
+ * WHEN DOING TESTING WITH COMMENTS, REMEMBER, REMEBER
+ * NEWLINES!!!!!
+ *
+ * NEW LINES 
+ * NEW LINES
+ */
+
 TEST(LexerTest, CorrectLength){
     std::string test_string = "int number = 9";
     Lexer lexer(test_string);
@@ -73,14 +81,48 @@ TEST(LexerTest, CorrectLexemes){
     EXPECT_EQ(lexer.get_lexemes(), expected_lexemes);
 }
 
+TEST(LexerTest, Conditions){
+    std::string test_string = 
+	"// this is a stupid comment, \"this is a string inside a comment\"\n"
+	"if (a == b) => \"hello world\"";
+
+    std::vector<std::string> expected_lexemes = {
+	"// this is a stupid comment, \"this is a string inside a comment\"",
+	"if", "(", "a", "==", "b", ")", "=>", "hello world"	
+    };
+
+    std::vector<TOKENTYPE> expected_types = {
+	COMMENT, IF, LEFT_PAR, ID, EQUAL_EQUAL, ID, RIGHT_PAR, ARROW, STRING	
+    };
+
+    Lexer lexer(test_string);
+    auto tokens = lexer.scan_tokens();
+    EXPECT_EQ(expected_lexemes, lexer.get_lexemes());
+    EXPECT_EQ(expected_types, lexer.get_types());
+}
+
+TEST(LexerTest, MulticharOps){
+    std::string test_string = 
+	"if a <= 5 => a += 3;"
+	"if a >= 3 => { bool condition = a == 5; }"
+	"123.321424 >= 231.4532 == 34";
+
+    std::vector<TOKENTYPE> expected_types = {
+	IF, ID, LTE, INT, ARROW, ID, PLUS, EQUAL, INT, SEMICOLON,
+	IF, ID, GTE, INT, ARROW, LEFT_BRACE, BOOL_TYPE, ID, EQUAL, ID,
+	EQUAL_EQUAL, INT, SEMICOLON, RIGHT_BRACE,
+	DOUBLE, GTE, DOUBLE, EQUAL_EQUAL, INT
+    };
+
+    std::vector<std::string> expected_lexemes = {
+	"if", "a", "<=", "5", "=>", "a", "+", "=", "3", ";",
+	"if", "a", ">=", "3", "=>", "{", "bool", "condition", "=", "a", "==", "5", ";", "}",
+	"123.321424", ">=", "231.4532", "==", "34",
+    };
+
+    Lexer lexer(test_string);
+    auto tokens = lexer.scan_tokens();
+    EXPECT_EQ(expected_lexemes, lexer.get_lexemes());
+    EXPECT_EQ(expected_types, lexer.get_types());
+}
 // TODO: Are the exceptions given by the lexer correct?
-
-
-
-
-
-
-
-
-
-

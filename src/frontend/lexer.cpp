@@ -21,7 +21,9 @@ std::unordered_map<std::string, TOKENTYPE> Lexer::keyword_map = {
 };
 
 bool Lexer::match(char c){
-    return peek_next() == c;
+    bool condition {peek_next() == c};
+    if (condition) current++;
+    return condition;
 }
 
 char Lexer::peek_next(){
@@ -48,9 +50,17 @@ std::vector<Token> Lexer::scan_tokens(){
 		case '\r':break;
 		case '\n':line++;break;
 		case ';': push_simple_token(SEMICOLON); break;
-		case '=': match('=') ? push_simple_token(EQUAL_EQUAL) : push_simple_token(EQUAL); break;
+
+		case '=': match('=') ? push_simple_token(EQUAL_EQUAL) :
+			  match('>') ? push_simple_token(ARROW) :
+			  push_simple_token(EQUAL); break;
+
 		case '+': push_simple_token(PLUS); break;
 		case '"': start++;current++; push_string_token(); break;
+		case '(': push_simple_token(LEFT_PAR); break;
+		case ')': push_simple_token(RIGHT_PAR); break;
+		case '{': push_simple_token(LEFT_BRACE);break;
+		case '}': push_simple_token(RIGHT_BRACE);break;
 		case '-': push_simple_token(MINUS);break;
 		case '*': push_simple_token(TIMES);break;
 		case '/': match('/') ? push_comment_token() : push_simple_token(SLASH);break;
@@ -75,7 +85,7 @@ std::vector<Token> Lexer::scan_tokens(){
 
 void Lexer::push_simple_token(TOKENTYPE token_type)
 {	
-    auto token = Token(token_type, std::string(1, input_string[current]), line, current);
+    auto token = Token(token_type, input_string.substr(start, current - start + 1), line, current);
     tokens.push_back(token); 
 }
 

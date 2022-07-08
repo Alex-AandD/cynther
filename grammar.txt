@@ -1,0 +1,20 @@
+Getting a taste of cynther
+
+fun main(string s1, int some_int) => int {
+    if "hello" == letters && 5 != numbers => x = x + 1; 
+    return 
+}
+
+    expr := binary | unary | primitive
+    
+    term := factor "+ | -" factor*
+    factor := unary "* | /" unary*
+    unary := "-" unary* 
+	    | primitive
+
+    primitive:   id
+	       | int
+	       | string
+	       | double
+	       | bool
+	       | "(" expr ")"
