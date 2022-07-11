@@ -36,7 +36,7 @@ bool Lexer::at_end(){
 }
 
 bool static isname(char c){
-    return  std::isalpha(c) || c == '_';
+    return  std::isalnum(c) || c == '_';
 }
 
 std::vector<Token> Lexer::scan_tokens(){
@@ -70,6 +70,11 @@ std::vector<Token> Lexer::scan_tokens(){
 		case '&': match('&') ? push_simple_token(AND):
 			  throw SyntaxError("missing second '&'", line, current, 
 				"Sugg: add one more '&'");lexer_errors++; break;  
+
+		case '|': match('|') ? push_simple_token(OR):
+			  throw SyntaxError("missing second '|'", line, current, 
+				"Sugg: add one more '|'");lexer_errors++; break;  
+
 		case '%': push_simple_token(MODULO);break;
 		default:
 			if (std::isdigit(c_char)){
@@ -114,39 +119,28 @@ void Lexer::push_number_token(){
 
 void Lexer::push_int_token()
 {
-    try{
-	if (isname(input_string[current])){ 
-	    throw SyntaxError("only digits allowed for integers", line, current);
-	}
-	std::string lexeme = input_string.substr(start, current - start);
-	auto token = Token(INT, lexeme, line, current);
-	tokens.push_back(token);
-    } catch(SyntaxError& err){
-	err.show_error();
-	lexer_errors++;
-    }
-
+    if (isname(input_string[current])){ 
+	throw SyntaxError("only digits allowed for integers", line, current);}
+    
+    std::string lexeme = input_string.substr(start, current - start);
+    auto token = Token(INT, lexeme, line, current);
+    tokens.push_back(token);
+     
     current--;
 }
 
 void Lexer::push_double_token()
 {
-    try {
-	while(!at_end() && std::isdigit(input_string[current])){
-	    current++;
-	}
+    while(!at_end() && std::isdigit(input_string[current])){
+	current++; }
 
-	if (!at_end() && isname(input_string[current])){
-	    throw SyntaxError("only digits allowed for doubles", line, current);
-	}
-	std::string lexeme = input_string.substr(start, current - start);
-	auto token = Token(DOUBLE, lexeme, line, current);
-	tokens.push_back(token);
+    if (!at_end() && isname(input_string[current])){
+	throw SyntaxError("only digits allowed for doubles", line, current); }
 
-    } catch(SyntaxError& err){
-	err.show_error();
-	lexer_errors++;
-    }
+    std::string lexeme = input_string.substr(start, current - start);
+    auto token = Token(DOUBLE, lexeme, line, current);
+    tokens.push_back(token);
+    
     current--;
 }
 
@@ -164,31 +158,21 @@ void Lexer::push_string_token(){
 
 void Lexer::push_id_token()
 {
-   try {
-       while(!at_end() && isname(input_string[current])){
-	    current++;
-	}
-	if (std::isdigit(input_string[current])){ 
-	    throw UndefinedLiteral("id", input_string.substr(start, current -  start + 1),
-				    line, current); }
+   while(!at_end() && isname(input_string[current])){
+	current++;}
 
-	std::string lexeme = input_string.substr(start, current - start);
-	auto keyword_it = keyword_map.find(lexeme);
-	if (keyword_it != keyword_map.end()){
-	    tokens.push_back(Token(keyword_it -> second, lexeme, line, current)); }
-	else {
-	    tokens.push_back(Token(ID, lexeme, line, current));}
-       } catch(UndefinedLiteral& und){
-	    und.print_error();
-	    lexer_errors++;
-       }
+    std::string lexeme = input_string.substr(start, current - start);
+    auto keyword_it = keyword_map.find(lexeme);
+    if (keyword_it != keyword_map.end()){ 
+	tokens.push_back(Token(keyword_it -> second, lexeme, line, current)); }
+    else { tokens.push_back(Token(ID, lexeme, line, current));}
     current--;
 }
 
-void Lexer::__repr__(){
+void Lexer::tokens_to_string(){
     std::cout << "NUMBER OF TOKENS: " << tokens.size() << '\n';
     for (auto& token: tokens){
-	token.__repr__();
+	token.to_string();
     }
 }
 

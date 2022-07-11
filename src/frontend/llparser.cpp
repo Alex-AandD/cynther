@@ -8,7 +8,7 @@ LLParser::~LLParser(){  }
 Expr* LLParser::parse(){
     try {
 	return expression();
-    } catch(ParserError& err){
+    } catch(...){
 	std::cout << "error found: implement ParserError" << '\n';
     }
 }

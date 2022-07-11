@@ -24,14 +24,16 @@ public:
     ~Lexer();
 
     void set_input_string(std::string new_input){
-	input_string = new_input; 
-	std::cout << "this is input_string now" << input_string <<'\n';
-    }
+	input_string = new_input;  }
+
     std::vector<Token> scan_tokens();
     
     bool match(char c);
     char peek_next();
     bool at_end();
+
+    std::vector<TOKENTYPE> get_types() const;
+    std::vector<std::string> get_lexemes() const;
 
     void push_simple_token(TOKENTYPE);
     void push_number_token();
@@ -41,7 +43,5 @@ public:
     void push_id_token();
     void push_comment_token();
 
-    void __repr__();
-    std::vector<TOKENTYPE> get_types() const;
-    std::vector<std::string> get_lexemes() const;
+    void tokens_to_string();
 };

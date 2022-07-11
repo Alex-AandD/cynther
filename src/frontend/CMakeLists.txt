@@ -3,6 +3,7 @@ set(frontend_SOURCES lexer.cpp
 		     token.cpp 
 		     expression.cpp
 		     llparser.cpp
+		     stmt.cpp
 		     exceptions.cpp)
 add_library(frontend ${frontend_SOURCES})
 target_include_directories(frontend PRIVATE ${PROJECT_SOURCE_DIR}/include)

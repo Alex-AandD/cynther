@@ -14,16 +14,16 @@ enum TOKENTYPE {
 
 class Token {
     private:
-	size_t offset;
-	size_t line;
 	std::string lexeme;	
 	TOKENTYPE type;
+	size_t line;
+	size_t offset;
     public:
 	Token(TOKENTYPE, std::string lexeme, size_t line, size_t offset);
 	Token();
-
 	// visual representation of the token 
-	void __repr__();
+	
+	void to_string();
 
 	// some getters
 	inline std::string get_lexeme() const { return lexeme; }

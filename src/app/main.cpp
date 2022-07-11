@@ -30,8 +30,10 @@ int main(int argc, char *argv[]){
 
     Lexer lexer(input_string);
     auto tokens = lexer.scan_tokens();
-    LLParser parser(tokens);
+    lexer.tokens_to_string();
+
+    /*LLParser parser(tokens);
     auto final_expr = parser.parse();
-    std::cout << final_expr->to_string() << '\n';
+    std::cout << final_expr->to_string() << '\n';*/
     fclose(file);
 }

@@ -11,6 +11,7 @@ SyntaxError::SyntaxError(std::string _msg, int _line, int _column):
 SyntaxError::SyntaxError(std::string _msg, int _line, int _column, std::string _sugg):
     msg(_msg), line(_line), column(_column), suggestion(_sugg) { }
 
+SyntaxError::~SyntaxError(){ }
 void SyntaxError::show_error() const noexcept {
     std::cerr << "Syntax Error: " << msg << " " << line << ":" << column << '\n' <<
     suggestion;
@@ -19,5 +20,6 @@ void SyntaxError::show_error() const noexcept {
 /*******************************************************************
  * HANDLING PARSER ERRORS INSIDE
  * *****************************************************************/
-ParserError::ParserError(){}
+/*ParserError::ParserError(){}
 ParserError::~ParserError(){}
+*/

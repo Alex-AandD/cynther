@@ -13,6 +13,8 @@ class LLParser {
 	~LLParser();
 
 	Expr* parse();
+
+	Expr* assignment();
 	Expr* expression();
 	Expr* term();
 	Expr* factor();

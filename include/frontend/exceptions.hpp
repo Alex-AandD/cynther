@@ -14,7 +14,7 @@ class SyntaxError: std::exception {
 	void show_error() const noexcept;
 };
 
-class ParserError: std::exception {
+/*class ParserError: std::exception {
     std::string msg;
     int line;
     int column;
@@ -22,5 +22,5 @@ class ParserError: std::exception {
     public:
 	explicit ParserError();
 	~ParserError();
-	void show_error();
-};
+	const char* what()const noexcept override;
+};*/

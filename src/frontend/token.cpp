@@ -4,7 +4,7 @@
 Token::Token() { }
 
 Token::Token(TOKENTYPE _type, std::string _lex, size_t _line, size_t _offset)
-    :type(_type), lexeme(_lex), line(_line), offset(_offset){}
+    :lexeme(_lex),type(_type), line(_line), offset(_offset){}
 
 static std::string TOKENTYPE_to_str(TOKENTYPE type){
     switch(type){
@@ -12,17 +12,21 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
 	case MINUS: return "MINUS";
 	case LEFT_BRACE: return "LEFT_BRACE";
 	case RIGHT_BRACE: return "RIGHT_BRACE";
+	case INT: return "INT";
+	case DOUBLE: return "DOUBLE";
+	case BOOL: return "BOOL";
+	case STRING: return "STRING";
 	case RIGHT_PAR: return "RIGHT_PAR";
 	case LEFT_PAR: return "LEFT_PAR";
 	case TIMES: return "TIMES";
 	case IF: return "IF";
 	case SLASH: return "SLASH";
-	case MODULO: return "MODULO";
 	case SEMICOLON: return "SEMICOLON";
-	case COMMENT: return "COMMENT";
 	case ARROW : return "ARROW";
 	case EQUAL: return "EQUAL";
 	case EQUAL_EQUAL: return "EQUAL_EQUAL";
+	case AND: return "AND";
+	case OR: return "OR";
 	case GT: return "GT";
 	case GTE: return "GTE";
 	case LT: return "LT";
@@ -32,10 +36,8 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
 	case BOOL_TYPE: return "BOOL_TYPE";
 	case DOUBLE_TYPE: return "DOUBLE_TYPE";
 	case NOT_EQUAL: return "NOT_EQUAL";
-	case INT: return "INT";
-	case DOUBLE: return "DOUBLE";
-	case BOOL: return "BOOL";
-	case STRING: return "STRING";
+	case MODULO: return "MODULO";
+	case COMMENT: return "COMMENT";
 	case FUNCTION: return "FUNCTION";
 	case EOF_: return "EOF";
 	case ID: return "ID";
@@ -43,7 +45,7 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
     }
 }
 
-void Token::__repr__(){
+void Token::to_string(){
     std::cout << TOKENTYPE_to_str(type) << ' ';
     std::cout << lexeme << ' ';
     std::cout << line << ':' << offset << '\n';
