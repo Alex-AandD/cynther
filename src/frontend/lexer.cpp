@@ -67,16 +67,19 @@ std::vector<Token> Lexer::scan_tokens(){
 		case '>': match('=') ? push_simple_token(GTE) : push_simple_token(GT);break;
 		case '<': match('=') ? push_simple_token(LTE) : push_simple_token(LT);break;
 		case '!': match('=') ? push_simple_token(NOT_EQUAL) : push_simple_token(NOT);break;
+		case '&': match('&') ? push_simple_token(AND):
+			  throw SyntaxError("missing second '&'", line, current, 
+				"Sugg: add one more '&'");lexer_errors++; break;  
 		case '%': push_simple_token(MODULO);break;
 		default:
 			if (std::isdigit(c_char)){
 			    push_number_token();break;}
 			if (isname(c_char)) 
 			    push_id_token();break;
-			throw UndefinedCharacter(c_char, line, current);
-		}
-	} catch(UndefinedCharacter& exc){
-	    exc.print_error();
+			throw SyntaxError("undefined character", line, current);
+	    }
+	} catch(SyntaxError& syner){
+	    syner.show_error();
 	}
 	current++;
     }
@@ -113,14 +116,13 @@ void Lexer::push_int_token()
 {
     try{
 	if (isname(input_string[current])){ 
-	    throw UndefinedLiteral("integer", input_string.substr(start, current -  start + 1),
-		  line, current);
+	    throw SyntaxError("only digits allowed for integers", line, current);
 	}
 	std::string lexeme = input_string.substr(start, current - start);
 	auto token = Token(INT, lexeme, line, current);
 	tokens.push_back(token);
-    } catch(UndefinedLiteral& und){
-	und.print_error();
+    } catch(SyntaxError& err){
+	err.show_error();
 	lexer_errors++;
     }
 
@@ -133,12 +135,16 @@ void Lexer::push_double_token()
 	while(!at_end() && std::isdigit(input_string[current])){
 	    current++;
 	}
+
+	if (!at_end() && isname(input_string[current])){
+	    throw SyntaxError("only digits allowed for doubles", line, current);
+	}
 	std::string lexeme = input_string.substr(start, current - start);
 	auto token = Token(DOUBLE, lexeme, line, current);
 	tokens.push_back(token);
 
-    } catch(UndefinedLiteral& und){
-	und.print_error();
+    } catch(SyntaxError& err){
+	err.show_error();
 	lexer_errors++;
     }
     current--;
@@ -148,7 +154,7 @@ void Lexer::push_string_token(){
     while(!at_end() && input_string[current] != '"') {
 	current++;
     }
-    if (at_end()) throw MissingClosingQuote(line, start);
+    if (at_end()) throw SyntaxError("missing closing quote: ", line, start);
     std::string lexeme = input_string.substr(start, current - start);
     auto token = Token(STRING, lexeme, line, start); // using start, probably in the future both 
 						     // start and current will be needed to get 

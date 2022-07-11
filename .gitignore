@@ -3,3 +3,4 @@ build.sh
 test.sh
 mock_files/
 .cache/
+*.txt

@@ -1,33 +1,23 @@
 #include <iostream>
 #include "frontend/exceptions.hpp"
 
-UndefinedCharacter::UndefinedCharacter(char c, size_t l, size_t off)
-    :char_wrong(c), line(l), offset(off){ }
 
-void UndefinedCharacter::print_error()
-{
-    std::cout << ">>> Error: Unexpected Character "
-    << line << ":" << offset << '\n'
-    << char_wrong << "cannot be recognized\n";
+/*******************************************************************
+ * HANDLING SYNTAX ERRORS INSIDE THE LEXER
+ * *****************************************************************/
+SyntaxError::SyntaxError(std::string _msg, int _line, int _column):
+    SyntaxError(_msg, _line, _column, nullptr) { }
+
+SyntaxError::SyntaxError(std::string _msg, int _line, int _column, std::string _sugg):
+    msg(_msg), line(_line), column(_column), suggestion(_sugg) { }
+
+void SyntaxError::show_error() const noexcept {
+    std::cerr << "Syntax Error: " << msg << " " << line << ":" << column << '\n' <<
+    suggestion;
 }
 
-
-UndefinedLiteral::UndefinedLiteral(std::string _type, std::string lex,
-				    size_t l, size_t off)
-    :type(_type), lexeme(lex), line(l), offset(off){ }
-
-void UndefinedLiteral::print_error()
-{
-    std::cout << ">>> Error: Undefined Literal "
-    << line << ":" << offset << '\n'
-    << lexeme << "is not a valid " << type << '\n';
-}
-
-MissingClosingQuote::MissingClosingQuote(size_t l, size_t off)
-    :line(l), offset(off){ }
-
-void MissingClosingQuote::print_error()
-{
-    std::cout << ">>> Error: Missing Closing Quote"
-    << line << ":" << offset << '\n';
-}
+/*******************************************************************
+ * HANDLING PARSER ERRORS INSIDE
+ * *****************************************************************/
+ParserError::ParserError(){}
+ParserError::~ParserError(){}

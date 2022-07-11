@@ -2,32 +2,25 @@
 #include <stdexcept>
 #include <string>
 
-class UndefinedCharacter : std::exception {
-    char char_wrong;
-    size_t line;
-    size_t offset;
-public:
-    UndefinedCharacter(char c, size_t line, size_t offset);
-    void print_error();
+class SyntaxError: std::exception {
+    std::string msg; 
+    int line;
+    int column;
+    std::string suggestion;
+    public:
+	explicit SyntaxError(std::string, int line, int column, std::string suggestion);
+	explicit SyntaxError(std::string, int line, int column);
+	~SyntaxError() override;
+	void show_error() const noexcept;
 };
 
-class UndefinedLiteral : std::exception {
-    std::string type;
-    std::string lexeme;
-    size_t line;
-    size_t offset;
-    
-public:
-    UndefinedLiteral(std::string type, std::string lex, 
-	    size_t line, size_t offset);
-    void print_error();
-};
-
-class MissingClosingQuote: std::exception {
-    size_t line;
-    size_t offset;
-    
-public:
-    MissingClosingQuote(size_t line, size_t offset);
-    void print_error();
+class ParserError: std::exception {
+    std::string msg;
+    int line;
+    int column;
+    std::string suggestion; 
+    public:
+	explicit ParserError();
+	~ParserError();
+	void show_error();
 };
