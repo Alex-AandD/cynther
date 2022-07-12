@@ -3,8 +3,8 @@
 #include "frontend/stmt.hpp"
 #include "frontend/expression.hpp"
 
-LLParser::LLParser(std::vector<Token> _tokens):
-    tokens(_tokens), current(0) {} 
+LLParser::LLParser(std::vector<Token> _tokens): tokens(_tokens), current(0) {} 
+
 LLParser::~LLParser(){ 
     for (auto& stmt: stmts){
 	delete stmt;
@@ -13,18 +13,18 @@ LLParser::~LLParser(){
 }
 
 std::vector<Stmt*> LLParser::parse(){
-    try {
-	program();
-    } catch(...){
-	std::cout << "error found: implement ParserError" << '\n';
-    }
+    program();
     return stmts;
 }
 
 void LLParser::program(){
     while (!at_end()){
-	Stmt* stmt = declaration();
-	stmts.push_back(stmt);
+	try {
+	    Stmt* stmt = declaration();
+	    stmts.push_back(stmt);
+	} catch(ParserError& err){
+	    err.show_error();
+	}
     }
 }
 
@@ -59,9 +59,13 @@ Stmt* LLParser::int_declaration(){
 		advance();
 		return new IntDeclarationStmt(id_token, expr);
 	    }
-	    std::cout << "implement semicolon error msg" << '\n';
+	    Token curr_token = previous_token();
+	    synchronise(SEMICOLON);
+	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
 	} else {
-	    std::cout << "Implement error msg" << '\n';
+	    synchronise(SEMICOLON);
+	    throw ParserError("incomplete variable declaration missing '='",
+		    id_token.get_line(), id_token.get_offset());
 	}
     }
     return nullptr;
@@ -69,7 +73,7 @@ Stmt* LLParser::int_declaration(){
 
 Stmt* LLParser::double_declaration(){
     if (match({ID})){
-	Token id_token = current_token();
+	Token id_token = previous_token();
 	advance();
 	if (match({EQUAL})){
 	    advance();
@@ -78,9 +82,13 @@ Stmt* LLParser::double_declaration(){
 		advance();
 		return new DoubleDeclarationStmt(id_token, expr);
 	    }
-	    std::cout << "implement semicolon error msg" << '\n';
+	    Token curr_token = previous_token();
+	    synchronise(SEMICOLON);
+	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
 	} else {
-	    std::cout << "Implement error msg" << '\n';
+	    synchronise(SEMICOLON);
+	    throw ParserError("incomplete variable declaration missing '='",
+		    id_token.get_line(), id_token.get_offset());
 	}
     }
     return nullptr;
@@ -97,11 +105,15 @@ Stmt* LLParser::string_declaration(){
 		advance();
 		return new StringDeclarationStmt(id_token, expr);
 	    }
-	    std::cout << "implement semicolon error msg" << '\n';
-
+	    Token curr_token = previous_token();
+	    synchronise(SEMICOLON);
+	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
 	} else {
-	    std::cout << "Implement error msg" << '\n';
+	    synchronise(SEMICOLON);
+	    throw ParserError("incomplete variable declaration missing '='",
+		    id_token.get_line(), id_token.get_offset());
 	}
+
     }
     return nullptr;
 }
@@ -118,9 +130,13 @@ Stmt* LLParser::bool_declaration(){
 		advance();
 		return new BoolDeclarationStmt(id_token, expr);
 	    }
-	    std::cout << "Implement semicolon error msg" << '\n';
+	    Token curr_token = previous_token();
+	    synchronise(SEMICOLON);
+	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
 	} else {
-	    std::cout << "Implement error msg" << '\n';
+	    synchronise(SEMICOLON);
+	    throw ParserError("incomplete variable declaration missing '='",
+		    id_token.get_line(), id_token.get_offset());
 	}
     }
     return nullptr;
@@ -214,7 +230,12 @@ Expr* LLParser::primary(){
 	Token left_par = current_token(); 
 	advance();
 	Expr* _expr = expression();
-	consume(RIGHT_PAR, "error: missing closing parenthesis: ", left_par);
+	if (!match({RIGHT_PAR})){
+	   synchronise(SEMICOLON);
+	   throw ParserError("missing closing parenthesis opened at", left_par.get_line(),
+		   left_par.get_offset());
+	}
+	advance();
 	return new GroupingExpr(_expr);
     }
     return nullptr;
@@ -246,4 +267,12 @@ std::string LLParser::tree_to_string() const noexcept {
 	final_string += stmt->to_string() + '\n';	
     }
     return final_string;
+}
+
+void LLParser::synchronise(TOKENTYPE type){
+    if (at_end()) return;
+    while (get_token_type(current) != type){
+	advance();
+    }
+    advance();
 }

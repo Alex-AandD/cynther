@@ -28,9 +28,9 @@ public:
 
     std::vector<Token> scan_tokens();
     
-    bool match(char c);
+    [[nodiscard]] bool match(char c);
     char peek_next();
-    bool at_end();
+    [[nodiscard]] bool at_end() const noexcept;
 
     std::vector<TOKENTYPE> get_types() const;
     std::vector<std::string> get_lexemes() const;

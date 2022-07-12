@@ -31,8 +31,8 @@ char Lexer::peek_next(){
     return -1;
 }
 
-bool Lexer::at_end(){
-    return current > input_string.size();
+bool Lexer::at_end() const noexcept{
+    return current >= input_string.size();
 }
 
 bool static isname(char c){

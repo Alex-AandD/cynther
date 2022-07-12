@@ -6,7 +6,9 @@
 //
 const char* node_types[] =
 {
-    "null", "document", "element", "pcdata", "cdata", "comment", "pi", "declaration"
+    "null", "document", "element", 
+    "pcdata", "cdata", "comment", "pi", 
+    "declaration"
 };
 
 struct simple_walker: pugi::xml_tree_walker
@@ -18,7 +20,6 @@ struct simple_walker: pugi::xml_tree_walker
         std::cout << node_types[node.type()] 
 	    << ": name='" << node.name() 
 	    << "', value='" << node.value() << "'\n";
-
         return true; // continue traversal
     }
 };

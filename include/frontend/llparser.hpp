@@ -16,6 +16,7 @@ class LLParser {
 	~LLParser();
 
 	std::vector<Stmt*> parse();
+	void synchronise(TOKENTYPE);
 	
 	void program();
 	Stmt* declaration();    
@@ -33,14 +34,15 @@ class LLParser {
 	Expr* primary();
 	
 	inline void advance(){ current++; }
-	inline Token current_token(){ return tokens[current]; }
-	inline TOKENTYPE get_token_type(size_t current_pos) {
+	[[nodiscard]] inline Token current_token(){ return tokens[current]; }
+	[[nodiscard]] inline Token previous_token() { return tokens[current - 1]; }
+	[[nodiscard]] inline TOKENTYPE get_token_type(size_t current_pos) {
 	    return tokens[current_pos].get_type(); }
-	inline bool at_end(){ return current >= tokens.size(); }
-	inline TOKENTYPE peek_next(){ 
+	[[nodiscard]] inline bool at_end(){ return current >= tokens.size(); }
+	[[nodiscard]] inline TOKENTYPE peek_next() { 
 	    return get_token_type(current+1);
 	}
-	bool match(std::vector<TOKENTYPE>); 
+	[[nodiscard]] bool match(std::vector<TOKENTYPE>); 
 	void consume(TOKENTYPE, std::string error_message, Token token);
 
 	[[nodiscard]] std::string tree_to_string() const noexcept;
