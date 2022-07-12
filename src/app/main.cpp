@@ -1,5 +1,6 @@
 #include "frontend/lexer.hpp"
 #include "frontend/llparser.hpp"
+#include "frontend/stmt.hpp"
 #include <fstream>
 
 size_t get_file_size(FILE* file){
@@ -30,10 +31,10 @@ int main(int argc, char *argv[]){
 
     Lexer lexer(input_string);
     auto tokens = lexer.scan_tokens();
-    lexer.tokens_to_string();
+    //lexer.tokens_to_string();
 
-    /*LLParser parser(tokens);
-    auto final_expr = parser.parse();
-    std::cout << final_expr->to_string() << '\n';*/
+    LLParser parser(tokens);
+    auto final_tree = parser.parse();
+    std::cout << parser.tree_to_string() << '\n';
     fclose(file);
 }

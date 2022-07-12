@@ -1,5 +1,14 @@
 Getting a taste of cynther
 
+program: declaration* EOF
+declaration: vardeclaration
+	    |stmt
+
+stmt:= expressionstmt 
+      |if expr block
+      |while expr block 
+      |block
+
 expr := binary
        |unary
        |primary
@@ -10,8 +19,10 @@ binary:= comparison
 	|factor
 
 comparison:= equality (> | < | <= | >=) comparison*
-equality:= term ( (== | !=) equality) *
-term:= factor ((+ | -) term)*
-factor:= unary ((* | /) factor)*
+equality:= and ( (== | !=) and) *
+and:= or (&& or)*
+or := term (|| term)*
+term:= factor ((+ | -) factor)*
+factor:= unary ((* | /) unary)*
 unary:= ((! | -) unary)* | primary
 primary:= bool | int | double | string | ( expression )

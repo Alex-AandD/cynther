@@ -20,6 +20,7 @@ add_executable(
 target_link_libraries(
     parser_test
     gtest_main
+    xml_support
     frontend
 )
 
@@ -33,5 +34,5 @@ add_test(
 
 add_test(
     NAME parser_test
-    COMMAND $<TARGET_FILE:lexer_test>
+    COMMAND $<TARGET_FILE:parser_test>
 )

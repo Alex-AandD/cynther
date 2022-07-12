@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+<program>
+    <BinaryExpr>
+	<IntNode>5</IntNode>
+	<IntNode>10</IntNode>
+    </BinaryExpr>
+</program>
