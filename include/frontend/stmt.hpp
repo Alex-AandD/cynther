@@ -11,6 +11,19 @@ class Stmt {
 	[[nodiscard]] virtual std::string to_string() const noexcept = 0;
 };
 
+class WhileStmt: public Stmt {
+    private:
+	Expr* condition;
+	Stmt* body;
+    public:
+	WhileStmt(Expr* condition, Stmt* body);
+	~WhileStmt() override;
+
+	[[nodiscard]] inline Expr* get_condition() const noexcept { return condition; };
+	[[nodiscard]] inline Stmt* get_body() const noexcept { return body; };
+	[[nodiscard]] std::string to_string() const noexcept override;
+};
+
 class IfStmt : public Stmt {
     private:
 	Expr* condition;

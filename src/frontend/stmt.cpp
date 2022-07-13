@@ -4,6 +4,24 @@
 Stmt::Stmt(){ }
 Stmt::~Stmt() { }
 
+
+WhileStmt::WhileStmt(Expr* cond, Stmt* bod):condition(cond), body(bod) { }
+WhileStmt::~WhileStmt(){
+    if (condition != nullptr){
+	delete condition;
+	condition = nullptr;
+    }
+
+    if (body != nullptr){
+	delete body;
+	body = nullptr;
+    }
+}
+
+std::string WhileStmt::to_string() const noexcept {
+    return "while" + condition->to_string() + " => " + body->to_string(); 
+}
+
 IfStmt::IfStmt(Expr* cond, Stmt* bod):condition(cond), body(bod) { }
 IfStmt::~IfStmt(){
     if (condition != nullptr){

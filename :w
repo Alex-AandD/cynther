@@ -34,38 +34,11 @@ Stmt* LLParser::statement(){
 	return if_statement();
     }
 
-    if (match(WHILE)){
-	advance();
-	return while_statement();
-    }
-
-    if (match(LEFT_BRACE)){
+    if (match(LEFT_PAR)){
 	advance();
 	return block();
     }
     return declaration();
-}
-
-Stmt* LLParser::while_statement(){
-    Expr* condition = expression();
-    Token token = current_token();
-    if (match(ARROW)){
-	advance();
-	if (match(LEFT_BRACE)){
-	    advance();
-	    Stmt* body = block();
-	    return new WhileStmt(condition, body);
-	} else {
-	  parser_errors++;  
-	  synchronise(RIGHT_BRACE);
-	  throw ParserError("missing left brace after arrow", token.get_line(), token.get_offset());
-	}
-    } else {
-	parser_errors++;
-	synchronise(RIGHT_BRACE);
-	throw ParserError("expected arrow after condition", token.get_line(), token.get_offset());
-    }
-    return nullptr;
 }
 
 Stmt* LLParser::if_statement(){
@@ -74,13 +47,12 @@ Stmt* LLParser::if_statement(){
     if (match(ARROW)){
 	advance();
 	if (match(LEFT_BRACE)){
-	    advance();
 	    Stmt* body = block();
 	    return new IfStmt(condition, body);
 	} else {
 	  parser_errors++;  
 	  synchronise(RIGHT_BRACE);
-	  throw ParserError("missing left brace after arrow", token.get_line(), token.get_offset());
+	  throw ParserError("missing left brace", token.get_line(), token.get_current());
 	}
     } else {
 	parser_errors++;
@@ -89,6 +61,7 @@ Stmt* LLParser::if_statement(){
     }
     return nullptr;
 }
+
 
 Stmt* LLParser::block(){
     std::vector<Stmt*> v_stmts;
@@ -121,13 +94,6 @@ Stmt* LLParser::declaration(){
 	advance();
 	return double_declaration();}
 
-    else {
-	Token token = current_token();
-	parser_errors++;
-	synchronise(LEFT_BRACE);
-	throw ParserError("unexpected symbol", token.get_line(), token.get_offset());
-	exit(1);
-    }
     return nullptr;
 }
 
@@ -204,8 +170,7 @@ Stmt* LLParser::string_declaration(){
 	    Token curr_token = previous_token();
 	    parser_errors++;
 	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon after string declaration", 
-		    curr_token.get_line(), curr_token.get_offset());
+	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
 	} else {
 	    synchronise(SEMICOLON);
 	    parser_errors++;
@@ -253,29 +218,7 @@ Stmt* LLParser::bool_declaration(){
 }
 
 Expr* LLParser::expression(){
-    return comparison();
-}
-
-Expr* LLParser::comparison(){
-    Expr* left = equality();
-    while(match({LT, GT, LTE, GTE})){
-	Token op = current_token();
-	advance(); 	
-	Expr* right = equality();
-	left = new BinaryExpr(op, left, right);	
-    }
-    return left;
-}
-
-Expr* LLParser::equality(){
-    Expr* left = or_expr();
-    while(match({EQUAL_EQUAL, NOT_EQUAL})){
-	Token op = current_token();
-	advance(); 	
-	Expr* right = or_expr();
-	left = new BinaryExpr(op, left, right);	
-    }
-    return left;
+    return or_expr();
 }
 
 Expr* LLParser::or_expr(){
@@ -397,7 +340,8 @@ std::string LLParser::tree_to_string() const noexcept {
 }
 
 void LLParser::synchronise(TOKENTYPE type){
-    while (!at_end() && get_token_type(current) != type){
+    if (at_end()) return;
+    while (get_token_type(current) != type){
 	advance();
     }
     advance();

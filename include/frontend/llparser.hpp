@@ -20,6 +20,7 @@ class LLParser {
 	
 	void program();
 	[[nodiscard]] Stmt* statement();
+	[[nodiscard]] Stmt* while_statement();
 	[[nodiscard]] Stmt* if_statement();
 	[[nodiscard]] Stmt* block();
 
@@ -30,6 +31,8 @@ class LLParser {
 	[[nodiscard]] Stmt* double_declaration();
 	
 	[[nodiscard]] Expr* expression();
+	[[nodiscard]] Expr* comparison();	
+	[[nodiscard]] Expr* equality();	
 	[[nodiscard]] Expr* and_expr();
 	[[nodiscard]] Expr* or_expr();
 	[[nodiscard]] Expr* term();
