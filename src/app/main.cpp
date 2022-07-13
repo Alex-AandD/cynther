@@ -17,8 +17,8 @@ int main(int argc, char *argv[]){
 
     Lexer lexer(input_string.str());
     auto tokens = lexer.scan_tokens();
-    lexer.tokens_to_string();
-
+    // lexer.tokens_to_string();
+    if (lexer.has_errors()){ return 1; }
     LLParser parser(tokens);
     auto final_tree = parser.parse();
     std::cout << parser.tree_to_string() << '\n';

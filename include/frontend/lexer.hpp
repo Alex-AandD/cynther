@@ -42,6 +42,6 @@ public:
     void push_string_token();
     void push_id_token();
     void push_comment_token();
-
+    [[nodiscard]] bool has_errors() const noexcept { return lexer_errors > 0; }
     void tokens_to_string();
 };

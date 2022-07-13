@@ -40,6 +40,7 @@ bool static isname(char c){
 }
 
 std::vector<Token> Lexer::scan_tokens(){
+    
     while(!at_end()){
 	start = current;
 	char c_char {input_string[current]};
@@ -68,25 +69,22 @@ std::vector<Token> Lexer::scan_tokens(){
 		case '<': match('=') ? push_simple_token(LTE) : push_simple_token(LT);break;
 		case '!': match('=') ? push_simple_token(NOT_EQUAL) : push_simple_token(NOT);break;
 		case '&': match('&') ? push_simple_token(AND):
-			  throw SyntaxError("missing second '&'", line, current, 
-				"Sugg: add one more '&'");lexer_errors++; break;  
+			  throw SyntaxError("missing second '&'", line, current); break;  
 
 		case '|': match('|') ? push_simple_token(OR):
-			  throw SyntaxError("missing second '|'", line, current, 
-				"Sugg: add one more '|'");lexer_errors++; break;  
+			  throw SyntaxError("missing second '|'", line, current); break;  
 
 		case '%': push_simple_token(MODULO);break;
 		default:
-			if (std::isdigit(c_char)){
-			    push_number_token();break;}
-			if (isname(c_char)) 
-			    push_id_token();break;
+			if (std::isdigit(c_char)){ push_number_token();break;}
+			if (std::isalpha(c_char) || c_char == '_'){push_id_token();break;}
 			throw SyntaxError("undefined character", line, current);
 	    }
-	} catch(SyntaxError& syner){
-	    syner.show_error();
+	} catch(SyntaxError& err){
+		lexer_errors++;
+		err.show_error();
 	}
-	current++;
+	    current++;
     }
     return tokens;
 }

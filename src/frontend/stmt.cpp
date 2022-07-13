@@ -4,6 +4,43 @@
 Stmt::Stmt(){ }
 Stmt::~Stmt() { }
 
+IfStmt::IfStmt(Expr* cond, Stmt* bod):condition(cond), body(bod) { }
+IfStmt::~IfStmt(){
+    if (condition != nullptr){
+	delete condition;
+	condition = nullptr;
+    }
+
+    if (body != nullptr){
+	delete body;
+	body = nullptr;
+    }
+}
+
+std::string IfStmt::to_string() const noexcept {
+    return "if" + condition->to_string() + " => " + body->to_string(); 
+}
+
+BlockStmt::BlockStmt(std::vector<Stmt*> _stmts):stmts(_stmts){}
+BlockStmt::~BlockStmt(){
+    for (auto& stmt: stmts){
+	if (stmt != nullptr){
+	    delete stmt;
+	    stmt = nullptr;
+	}
+    }
+}
+
+std::string BlockStmt::to_string() const noexcept {
+    std::string block_string = "{";
+    for (auto& stmt: stmts){
+	block_string +=  "\n	";
+	block_string += stmt->to_string();
+    }
+    block_string += "\n}";
+    return block_string;
+}
+
 IntDeclarationStmt::IntDeclarationStmt(Token token, Expr* _expr)
     :id_token(token), expr(_expr) { }
 

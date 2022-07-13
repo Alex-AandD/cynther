@@ -1,6 +1,10 @@
 #pragma once
 #include <stdexcept>
 #include <string>
+#define RESET_COLOR   "\033[0m"
+#define RED "\033[31m"
+#define CYAN "\033[36m"
+
 
 class Diagnostics : std::exception {
     protected:
@@ -15,6 +19,8 @@ class Diagnostics : std::exception {
 };
 
 class SyntaxError: public Diagnostics {
+    private:
+	std::string color;	
     public:
 	explicit SyntaxError(std::string, int line, int column, std::string suggestion);
 	explicit SyntaxError(std::string, int line, int column);
@@ -23,6 +29,8 @@ class SyntaxError: public Diagnostics {
 };
 
 class ParserError: public Diagnostics {
+    private:
+	std::string color;	
     public:
 	explicit ParserError(std::string, int line, int column, std::string suggestion);
 	explicit ParserError(std::string, int line, int column);
