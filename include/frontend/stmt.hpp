@@ -48,12 +48,13 @@ class BlockStmt : public Stmt {
 	[[nodiscard]] std::string to_string() const noexcept override;
 };
 
+
 class IntDeclarationStmt : public Stmt {
     private:
 	Token id_token;
 	Expr* expr;	
     public:
-	IntDeclarationStmt(Token, Expr*);
+	explicit IntDeclarationStmt(Token, Expr*);
 	~IntDeclarationStmt() override;	
 
 	[[nodiscard]] inline Token get_token() const noexcept { return id_token; }
@@ -66,7 +67,7 @@ class BoolDeclarationStmt: public Stmt {
 	Token id_token;
 	Expr* expr;
     public:
-	BoolDeclarationStmt(Token, Expr*);
+	explicit BoolDeclarationStmt(Token, Expr*);
 	~BoolDeclarationStmt() override;
 
 	[[nodiscard]] inline Token get_token() const noexcept { return id_token; }
@@ -79,7 +80,7 @@ class DoubleDeclarationStmt: public Stmt {
 	Token id_token;
 	Expr* expr;
     public:
-	DoubleDeclarationStmt(Token token, Expr*);
+	explicit DoubleDeclarationStmt(Token token, Expr*);
 	~DoubleDeclarationStmt() override;
 
 	[[nodiscard]] inline Token get_token() const noexcept { return id_token; }
@@ -92,7 +93,7 @@ class StringDeclarationStmt: public Stmt {
 	Token id_token;
 	Expr* expr;
     public:
-	StringDeclarationStmt(Token, Expr*);
+	explicit StringDeclarationStmt(Token, Expr*);
 	~StringDeclarationStmt() override;
 
 	[[nodiscard]] inline Token get_token() const noexcept { return id_token; }

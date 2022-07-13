@@ -31,6 +31,7 @@ class LLParser {
 	[[nodiscard]] Stmt* double_declaration();
 	
 	[[nodiscard]] Expr* expression();
+	[[nodiscard]] Expr* assignment();
 	[[nodiscard]] Expr* comparison();	
 	[[nodiscard]] Expr* equality();	
 	[[nodiscard]] Expr* and_expr();

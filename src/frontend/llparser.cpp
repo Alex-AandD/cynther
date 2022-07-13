@@ -128,7 +128,7 @@ Stmt* LLParser::declaration(){
 	throw ParserError("unexpected symbol", token.get_line(), token.get_offset());
 	exit(1);
     }
-    return nullptr;
+    return nullptr; 
 }
 
 Stmt* LLParser::int_declaration(){
@@ -253,23 +253,52 @@ Stmt* LLParser::bool_declaration(){
 }
 
 Expr* LLParser::expression(){
-    return comparison();
+    return assignment();
 }
 
-Expr* LLParser::comparison(){
-    Expr* left = equality();
-    while(match({LT, GT, LTE, GTE})){
+Expr* LLParser::assignment(){
+   Expr* left = equality(); 
+   if (match(EQUAL)){
+	Token id_token = previous_token();	
+	std::cout << "token to string: ";id_token.to_string();
+	advance();
+	Expr* expr = assignment();
+	std::cout << expr->to_string();
+	if (id_token.get_type() == ID){
+	    if (match(SEMICOLON)){
+		advance();
+		return new AssignmentExpr(id_token, expr);
+	    } else {
+	    parser_errors++;
+	    synchronise(SEMICOLON);
+	    throw ParserError("missing semicolon at the end of assignment expression", id_token.get_line(),
+		    id_token.get_offset());
+	    }
+	} else {
+	    parser_errors++;
+	    synchronise(SEMICOLON);
+	    throw ParserError("assignment expression only valid with variables", id_token.get_line(),
+		    id_token.get_offset());
+	}
+   }
+   return left;
+
+}
+
+Expr* LLParser::equality(){
+    Expr* left = comparison();
+    while(match({EQUAL_EQUAL, NOT_EQUAL})){
 	Token op = current_token();
 	advance(); 	
-	Expr* right = equality();
+	Expr* right = comparison();
 	left = new BinaryExpr(op, left, right);	
     }
     return left;
 }
 
-Expr* LLParser::equality(){
+Expr* LLParser::comparison(){
     Expr* left = or_expr();
-    while(match({EQUAL_EQUAL, NOT_EQUAL})){
+    while(match({GT, GTE, LT, LTE})){
 	Token op = current_token();
 	advance(); 	
 	Expr* right = or_expr();
