@@ -260,10 +260,8 @@ Expr* LLParser::assignment(){
    Expr* left = equality(); 
    if (match(EQUAL)){
 	Token id_token = previous_token();	
-	std::cout << "token to string: ";id_token.to_string();
 	advance();
 	Expr* expr = assignment();
-	std::cout << expr->to_string();
 	if (id_token.get_type() == ID){
 	    if (match(SEMICOLON)){
 		advance();

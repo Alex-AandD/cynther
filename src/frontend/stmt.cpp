@@ -59,6 +59,17 @@ std::string BlockStmt::to_string() const noexcept {
     return block_string;
 }
 
+ExpressionStmt::ExpressionStmt(Expr* e): expression(e){ } 
+ExpressionStmt::~ExpressionStmt(){
+    if (expression != nullptr) {
+	delete expression;
+	expression = nullptr;
+    }
+} 
+std::string ExpressionStmt::to_string() const noexcept {
+    return expression -> to_string();
+}
+
 IntDeclarationStmt::IntDeclarationStmt(Token token, Expr* _expr)
     :id_token(token), expr(_expr) { }
 

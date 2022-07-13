@@ -48,6 +48,15 @@ class BlockStmt : public Stmt {
 	[[nodiscard]] std::string to_string() const noexcept override;
 };
 
+class ExpressionStmt: public Stmt {
+    private:
+	Expr* expression;
+    public:
+	explicit ExpressionStmt(Expr*);
+	~ExpressionStmt() override;
+	[[nodiscard]] Expr* get_expression() const noexcept { return expression; }
+	[[nodiscard]] std::string to_string() const noexcept override;
+};
 
 class IntDeclarationStmt : public Stmt {
     private:

@@ -23,6 +23,7 @@ class LLParser {
 	[[nodiscard]] Stmt* while_statement();
 	[[nodiscard]] Stmt* if_statement();
 	[[nodiscard]] Stmt* block();
+	[[nodiscard]] Stmt* expr_statement();
 
 	[[nodiscard]] Stmt* declaration();    
 	[[nodiscard]] Stmt* int_declaration();
