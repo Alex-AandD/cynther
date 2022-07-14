@@ -23,20 +23,6 @@ BinaryExpr::BinaryExpr(BinaryExpr&& other){
     }
 }
 
-AssignmentExpr::AssignmentExpr(Token token, Expr* _expr)
-    :id_token(token), expr(_expr) { }
-
-AssignmentExpr::~AssignmentExpr(){
-    if (expr != nullptr){
-	delete expr;
-    }
-    expr = nullptr;
-}
-
-std::string AssignmentExpr::to_string() const noexcept {
-    return id_token.get_lexeme() + " "  "="  " " + expr->to_string();
-}
-
 BinaryExpr& BinaryExpr::operator=(BinaryExpr&& other){
     if(&other != this){	
 	delete left;

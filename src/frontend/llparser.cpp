@@ -1,10 +1,9 @@
 #include "frontend/llparser.hpp"
-#include "frontend/exceptions.hpp"
 #include "frontend/stmt.hpp"
 #include "frontend/expression.hpp"
+#include "frontend/exceptions.hpp"
 
 LLParser::LLParser(std::vector<Token> _tokens): tokens(_tokens), current(0) {} 
-
 LLParser::~LLParser(){ 
     for (auto& stmt: stmts){
 	delete stmt;
@@ -20,89 +19,18 @@ std::vector<Stmt*> LLParser::parse(){
 void LLParser::program(){
     while (!at_end()){
 	try {
-	    Stmt* stmt = statement();
+	    Stmt* stmt = declaration();
 	    stmts.push_back(stmt);
 	} catch(ParserError& err){
+	    inc_errors();
 	    err.show_error();
 	}
     }
 }
 
-Stmt* LLParser::statement(){
-    if (match(IF)){
-	advance();
-	return if_statement();
-    }
-
-    if (match(WHILE)){
-	advance();
-	return while_statement();
-    }
-
-    if (match(LEFT_BRACE)){
-	advance();
-	return block();
-    }
-    return declaration();
-}
-
-Stmt* LLParser::while_statement(){
-    Expr* condition = expression();
-    Token token = current_token();
-    if (match(ARROW)){
-	advance();
-	if (match(LEFT_BRACE)){
-	    advance();
-	    Stmt* body = block();
-	    return new WhileStmt(condition, body);
-	} else {
-	  parser_errors++;  
-	  synchronise(RIGHT_BRACE);
-	  throw ParserError("missing left brace after arrow", token.get_line(), token.get_offset());
-	}
-    } else {
-	parser_errors++;
-	synchronise(RIGHT_BRACE);
-	throw ParserError("expected arrow after condition", token.get_line(), token.get_offset());
-    }
-    return nullptr;
-}
-
-Stmt* LLParser::if_statement(){
-    Expr* condition = expression();
-    Token token = current_token();
-    if (match(ARROW)){
-	advance();
-	if (match(LEFT_BRACE)){
-	    advance();
-	    Stmt* body = block();
-	    return new IfStmt(condition, body);
-	} else {
-	  parser_errors++;  
-	  synchronise(RIGHT_BRACE);
-	  throw ParserError("missing left brace after arrow", token.get_line(), token.get_offset());
-	}
-    } else {
-	parser_errors++;
-	synchronise(RIGHT_BRACE);
-	throw ParserError("expected arrow after condition", token.get_line(), token.get_offset());
-    }
-    return nullptr;
-}
-
-Stmt* LLParser::block(){
-    std::vector<Stmt*> v_stmts;
-    while(!match(RIGHT_BRACE)){
-	v_stmts.push_back(statement()); }
-    if (at_end()) {
-	throw ParserError("missing right brace", previous_token().get_line(), previous_token().get_offset());
-	exit(1);
-    } else {
-	advance();
-	return new BlockStmt(v_stmts);
-    }
-    return nullptr;
-}
+/********************************************/
+/************* DECLARATIONS *****************/
+/********************************************/
 
 Stmt* LLParser::declaration(){
     if (match(INT_TYPE)){
@@ -121,41 +49,32 @@ Stmt* LLParser::declaration(){
 	advance();
 	return double_declaration();}
 
-    else {
-	Token token = current_token();
-	parser_errors++;
-	synchronise(LEFT_BRACE);
-	throw ParserError("unexpected symbol", token.get_line(), token.get_offset());
-	exit(1);
-    }
-    return nullptr; 
+    return statement();	
 }
 
 Stmt* LLParser::int_declaration(){
     Token id_token = current_token();
     if (match(ID)){
 	advance();
-	if (match(EQUAL)){
-	    advance();
-	    Expr* expr = expression();
-	    if (match(SEMICOLON)){
-		advance();
-		return new IntDeclarationStmt(id_token, expr);
-	    }
-	    Token curr_token = previous_token();
-	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
-	} else {
-	    synchronise(SEMICOLON);
-	    throw ParserError("incomplete variable declaration missing '='",
-		    id_token.get_line(), id_token.get_offset());
-	}
     } else {
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("expected id after type INT",
-		    id_token.get_line(), id_token.get_offset());
+	panic_mode(id_token, RIGHT_BRACE);
+	throw ParserError("expected id after type INT", line_error(), column_error());
+    }
 
+    if (match(EQUAL)){
+	advance();
+    } else {
+	panic_mode(id_token, RIGHT_BRACE);
+        throw ParserError("incomplete variable declaration missing '='", line_error(), column_error());
+    }
+
+    Expr* expr = expression();
+    if (match(SEMICOLON)){
+	advance();
+	return new StringDeclarationStmt(id_token, expr);
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("missing semicolon after string declaration", line_error(), column_error());
     }
     return nullptr;
 }
@@ -164,28 +83,25 @@ Stmt* LLParser::double_declaration(){
     Token id_token = current_token();
     if (match(ID)){
 	advance();
-	if (match(EQUAL)){
-	    advance();
-	    Expr* expr = expression();
-	    if (match(SEMICOLON)){
-		advance();
-		return new DoubleDeclarationStmt(id_token, expr);
-	    }
-	    Token curr_token = previous_token();
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
-	} else {
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("incomplete variable declaration, missing '='",
-		    id_token.get_line(), id_token.get_offset());
-	} 
     } else {
-	synchronise(SEMICOLON);
-	parser_errors++;
-	throw ParserError("expected id after type DOUBLE", id_token.get_line(),
-		id_token.get_offset());
+	panic_mode(id_token, RIGHT_BRACE);
+	throw ParserError("expected id after type DOUBLE", line_error(), column_error());
+    }
+
+    if (match(EQUAL)){
+	advance();
+    } else {
+	panic_mode(id_token, RIGHT_BRACE);
+        throw ParserError("incomplete variable declaration missing '='", line_error(), column_error());
+    }
+
+    Expr* expr = expression();
+    if (match(SEMICOLON)){
+	advance();
+	return new StringDeclarationStmt(id_token, expr);
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("missing semicolon after string declaration", line_error(), column_error());
     }
     return nullptr;
 }
@@ -194,93 +110,259 @@ Stmt* LLParser::string_declaration(){
     Token id_token = current_token();
     if (match(ID)){
 	advance();
-	if (match(EQUAL)){
-	    advance();
-	    Expr* expr = expression();
-	    if (match(SEMICOLON)){
-		advance();
-		return new StringDeclarationStmt(id_token, expr);
-	    }
-	    Token curr_token = previous_token();
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon after string declaration", 
-		    curr_token.get_line(), curr_token.get_offset());
-	} else {
-	    synchronise(SEMICOLON);
-	    parser_errors++;
-	    throw ParserError("incomplete variable declaration missing '='",
-		    id_token.get_line(), id_token.get_offset());
-	}
-
     } else {
-	synchronise(SEMICOLON);
-	parser_errors++;
-	throw ParserError("expected id after type STRING", id_token.get_line(),
-		id_token.get_offset());
+	panic_mode(id_token, RIGHT_BRACE);
+	throw ParserError("expected id after type STRING", line_error(), column_error());
+    }
+
+    if (match(EQUAL)){
+	advance();
+    } else {
+	panic_mode(id_token, RIGHT_BRACE);
+        throw ParserError("incomplete variable declaration missing '='", line_error(), column_error());
+    }
+
+    Expr* expr = expression();
+    if (match(SEMICOLON)){
+	advance();
+	return new StringDeclarationStmt(id_token, expr);
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("missing semicolon after string declaration", line_error(), column_error());
     }
     return nullptr;
 }
 
 Stmt* LLParser::bool_declaration(){
-    Token id_token = current_token(); 
+    Token id_token = current_token();
     if (match(ID)){
 	advance();
-	if (match(EQUAL)){
-	    advance();
-	    Expr* expr = expression();
-	    if (match(SEMICOLON)){
-		advance();
-		return new BoolDeclarationStmt(id_token, expr);
-	    }
-	    Token curr_token = previous_token();
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon", curr_token.get_line(), curr_token.get_offset());
-	} else {
-	    synchronise(SEMICOLON);
-	    parser_errors++;
-	    throw ParserError("incomplete variable declaration missing '='",
-		    id_token.get_line(), id_token.get_offset());
-	}
     } else {
-	    synchronise(SEMICOLON);
-	    parser_errors++;
-	    throw ParserError("expected id after type BOOL",
-		    id_token.get_line(), id_token.get_offset());
+	panic_mode(id_token, RIGHT_BRACE);
+	throw ParserError("expected id after type BOOL", line_error(), column_error());
+    }
+
+    if (match(EQUAL)){
+	advance();
+    } else {
+	panic_mode(id_token, RIGHT_BRACE);
+        throw ParserError("incomplete variable declaration missing '='", line_error(), column_error());
+    }
+
+    Expr* expr = expression();
+    if (match(SEMICOLON)){
+	advance();
+	return new StringDeclarationStmt(id_token, expr);
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("missing semicolon after string declaration", line_error(), column_error());
     }
     return nullptr;
 }
 
-Expr* LLParser::expression(){
-    return assignment();
+/********************************************/
+/**************** STATEMENT *****************/
+/********************************************/
+
+Stmt* LLParser::statement(){
+    if (match(FUNCTION)){
+	advance();								
+	return fun_statement();
+    }
+
+    if (match(IF)){
+	advance();
+	return if_statement();
+    }
+
+    if (match(WHILE)){
+	advance();
+	return while_statement();
+    }
+
+    if (match(LEFT_BRACE)){
+	advance();
+	return block();
+    }
+
+    if (match(RETURN)){
+	advance();
+	return return_statement();		
+    }
+
+    return assignment_statement();
 }
 
-Expr* LLParser::assignment(){
-   Expr* left = equality(); 
-   if (match(EQUAL)){
-	Token id_token = previous_token();	
+Stmt* LLParser::fun_statement(){
+    FunctionStmt* fun_statement = new FunctionStmt();
+    if (match(ID)){
 	advance();
-	Expr* expr = assignment();
-	if (id_token.get_type() == ID){
-	    if (match(SEMICOLON)){
-		advance();
-		return new AssignmentExpr(id_token, expr);
-	    } else {
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("missing semicolon at the end of assignment expression", id_token.get_line(),
-		    id_token.get_offset());
-	    }
-	} else {
-	    parser_errors++;
-	    synchronise(SEMICOLON);
-	    throw ParserError("assignment expression only valid with variables", id_token.get_line(),
-		    id_token.get_offset());
-	}
-   }
-   return left;
+    } else {
+	panic_mode(RIGHT_PAR);
+	throw ParserError("expected id after fun keyword", line_error(), column_error());
+    }
 
+    if (match(LEFT_PAR)){
+	if (get_token_type(current+1) == RIGHT_PAR){
+	   advance();
+	} else {
+	    fun_args(fun_statement);
+	}
+    }
+
+    if (match(RIGHT_PAR)){
+	advance();
+    } else {
+	panic_mode(LEFT_BRACE);
+	throw ParserError("expected closing parenthesis after argument list",
+		line_error(), column_error());
+    }
+
+    if (match(ARROW)){
+	advance();
+    } else {
+	panic_mode(LEFT_BRACE);
+	throw ParserError("expected arrow after argument list",
+		line_error(), column_error());
+    }
+
+    if (match({INT_TYPE, STRING_TYPE, BOOL_TYPE, DOUBLE_TYPE})){
+	fun_statement->set_return_type(get_token_type(current));
+	advance();
+    } else {
+	panic_mode(LEFT_BRACE);
+	throw ParserError("expected return type after function definition",
+		line_error(), column_error());
+    }
+
+    if (match(LEFT_BRACE)){
+	advance();
+	fun_statement->set_body(block());
+	return fun_statement;
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("expected opening brace after function declaration",
+		line_error(), column_error());
+    }
+
+    return nullptr;
+}
+
+void LLParser::fun_args(FunctionStmt* stmt){
+    do {
+	advance();
+	if (match({INT_TYPE, STRING_TYPE, BOOL_TYPE, DOUBLE_TYPE})){
+	    stmt->push_type(get_token_type(current));
+	    advance();
+	} else {
+	    panic_mode(RIGHT_PAR);
+	    throw ParserError("expected argument type", line_error(), column_error());
+	}
+	if (match(ID)){
+	    stmt->push_arg(current_token());
+	    advance();
+	} else {
+	    panic_mode(RIGHT_PAR);
+	    throw ParserError("Expected id after argument type", line_error(), column_error());
+	}
+    } while(match(COMA));
+};
+
+Stmt* LLParser::return_statement(){
+    Expr* value = expression();
+    if (match(SEMICOLON)){
+	advance();
+	return new ReturnStmt(value);
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("expected semicolon at the end of return statement", 
+		line_error(), column_error());
+    }
+    return nullptr;
+}
+
+Stmt* LLParser::while_statement(){
+    Expr* condition = expression();
+    //Token token = current_token();
+    if (match(ARROW)){
+	advance();
+	if (match(LEFT_BRACE)){
+	    advance();
+	    Stmt* body = block();
+	    return new WhileStmt(condition, body);
+	} else {
+	  panic_mode(RIGHT_BRACE);
+	  throw ParserError("missing left brace after arrow", line_error(), column_error());
+	}
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("expected arrow after condition", line_error(), column_error());
+    }
+    return nullptr;
+}
+
+Stmt* LLParser::if_statement(){
+    Expr* condition = expression();
+    //Token token = current_token();
+    if (match(ARROW)){
+	advance();
+	if (match(LEFT_BRACE)){
+	    advance();
+	    Stmt* body = block();
+	    return new IfStmt(condition, body);
+	} else {
+	    panic_mode(RIGHT_BRACE);
+	    throw ParserError("missing left brace after arrow", line_error(), column_error());
+	}
+    } else {
+	panic_mode(RIGHT_BRACE);
+	throw ParserError("expected arrow after condition", line_error(), column_error());
+    }
+    return nullptr;
+}
+
+Stmt* LLParser::block(){
+    std::vector<Stmt*> v_stmts;
+    while(!match(RIGHT_BRACE)){
+	v_stmts.push_back(declaration());
+    }
+    if (at_end()) {
+	set_error();
+	throw ParserError("missing right brace", line_error(), column_error());
+	exit(1);
+    } else {
+	advance();
+	return new BlockStmt(v_stmts);
+    }
+    return nullptr;
+}
+
+Stmt* LLParser::assignment_statement(){
+    Token id_token = current_token(); 
+    if (match(ID)){
+	advance();	
+    } else {
+	panic_mode(SEMICOLON);
+	throw ParserError("expected statement", line_error(), column_error());
+    }
+
+    if (match(EQUAL)){
+	advance();
+	Expr* expr = expression();
+	return new AssignmentStmt(id_token, expr);
+    } else {
+	panic_mode(SEMICOLON);
+	throw ParserError("expected assignment statement", line_error(), column_error());
+    }
+    return nullptr;
+}
+
+/********************************************/
+/*************** EXPRESSION *****************/
+/********************************************/
+
+Expr* LLParser::expression(){
+    return equality();
 }
 
 Expr* LLParser::equality(){
@@ -385,20 +467,23 @@ Expr* LLParser::primary(){
     }
 
     if (match(LEFT_PAR)){
-	Token left_par = current_token(); 
+	Token left_par = current_token();
 	advance();
 	Expr* _expr = expression();
-	if (!match(RIGHT_PAR)){
-	   synchronise(SEMICOLON);
-	    parser_errors++;
-	   throw ParserError("missing closing parenthesis opened at", left_par.get_line(),
-		   left_par.get_offset());
+	if (match(RIGHT_PAR)){
+	    advance();
+	    return new GroupingExpr(_expr);
+	} else {
+	    panic_mode(left_par, LEFT_BRACE);
+	    throw ParserError("missing closing parenthesis opened at", line_error(), column_error());
 	}
-	advance();
-	return new GroupingExpr(_expr);
     }
     return nullptr;
 }
+
+/*******************************************/
+/************** UTILITY ********************/
+/*******************************************/
 
 bool LLParser::match(std::vector<TOKENTYPE> v) const noexcept {
     if (at_end()) return false;
@@ -421,6 +506,16 @@ std::string LLParser::tree_to_string() const noexcept {
 	final_string += stmt->to_string() + '\n';	
     }
     return final_string;
+}
+
+void LLParser::panic_mode(TOKENTYPE sync_point) noexcept {
+    set_error();
+    synchronise(sync_point);
+}
+
+void LLParser::panic_mode(Token t, TOKENTYPE sync_point) noexcept {
+    set_error(t);
+    synchronise(sync_point);
 }
 
 void LLParser::synchronise(TOKENTYPE type){

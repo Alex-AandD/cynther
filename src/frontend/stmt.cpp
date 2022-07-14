@@ -4,6 +4,35 @@
 Stmt::Stmt(){ }
 Stmt::~Stmt() { }
 
+FunctionStmt::FunctionStmt(){}
+FunctionStmt::FunctionStmt(std::vector<Token> ar, Stmt* bod):args(ar), body(bod) {};
+FunctionStmt::~FunctionStmt(){
+    if (body != nullptr){
+	delete body;
+	body = nullptr;
+    }
+}
+
+std::string FunctionStmt::to_string() const noexcept {
+    std::string func = "fun "; 
+    for (auto& tok: args){
+	func += tok.get_lexeme() + ",";
+    }
+    func += body->to_string();
+    return func;
+}
+
+ReturnStmt::ReturnStmt(Expr* val):value(val){}
+ReturnStmt::~ReturnStmt(){
+    if (value != nullptr){
+	delete value;
+	value = nullptr;
+    }
+}
+
+std::string ReturnStmt::to_string() const noexcept {
+    return "return"  " " + value->to_string();
+}
 
 WhileStmt::WhileStmt(Expr* cond, Stmt* bod):condition(cond), body(bod) { }
 WhileStmt::~WhileStmt(){
@@ -59,15 +88,16 @@ std::string BlockStmt::to_string() const noexcept {
     return block_string;
 }
 
-ExpressionStmt::ExpressionStmt(Expr* e): expression(e){ } 
-ExpressionStmt::~ExpressionStmt(){
+AssignmentStmt::AssignmentStmt(Token tok, Expr* e): id_token(tok), expression(e){ } 
+AssignmentStmt::~AssignmentStmt(){
     if (expression != nullptr) {
 	delete expression;
 	expression = nullptr;
     }
-} 
-std::string ExpressionStmt::to_string() const noexcept {
-    return expression -> to_string();
+}
+
+std::string AssignmentStmt::to_string() const noexcept {
+    return id_token.get_lexeme() + expression -> to_string();
 }
 
 IntDeclarationStmt::IntDeclarationStmt(Token token, Expr* _expr)

@@ -8,6 +8,8 @@ stmt:= expressionstmt
       |if expr block
       |while expr block 
       |block
+      |fun ((id id)*) => block
+      | 
 
 expr := binary
        |unary

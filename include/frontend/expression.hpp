@@ -9,19 +9,6 @@ class Expr {
 	[[nodiscard]] std::string virtual to_string() const = 0;
 };
 
-class AssignmentExpr: public Expr {
-    private:
-	Token id_token;
-	Expr* expr;
-    public:
-	explicit AssignmentExpr(Token tok, Expr* val);
-	~AssignmentExpr() override;
-	[[nodiscard]] inline Token get_token() const noexcept { return id_token; }
-	[[nodiscard]] inline Expr* get_expr() const noexcept { return expr; }
-	[[nodiscard]] std::string to_string() const noexcept override;
-    
-};
-
 class BinaryExpr : public Expr {
     private:
 	Expr* left;

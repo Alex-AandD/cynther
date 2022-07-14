@@ -18,6 +18,7 @@ std::unordered_map<std::string, TOKENTYPE> Lexer::keyword_map = {
     {"string", STRING_TYPE}, 
     {"double", DOUBLE_TYPE}, 
     {"fun", FUNCTION},
+    {"return", RETURN},
 };
 
 bool Lexer::match(char c){
@@ -50,14 +51,18 @@ std::vector<Token> Lexer::scan_tokens(){
 		case '\t':
 		case '\r':break;
 		case '\n':line++;break;
+		case 'i': push_id_token(); break;
+		case 's': push_id_token(); break;
+		case 'd': push_id_token(); break;
+		case 'b': push_id_token(); break;
 		case ';': push_simple_token(SEMICOLON); break;
-
 		case '=': match('=') ? push_simple_token(EQUAL_EQUAL) :
 			  match('>') ? push_simple_token(ARROW) :
 			  push_simple_token(EQUAL); break;
 
 		case '+': push_simple_token(PLUS); break;
 		case '"': start++;current++; push_string_token(); break;
+		case ',': push_simple_token(COMA);break;
 		case '(': push_simple_token(LEFT_PAR); break;
 		case ')': push_simple_token(RIGHT_PAR); break;
 		case '{': push_simple_token(LEFT_BRACE);break;

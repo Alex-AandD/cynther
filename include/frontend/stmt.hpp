@@ -11,6 +11,39 @@ class Stmt {
 	[[nodiscard]] virtual std::string to_string() const noexcept = 0;
 };
 
+class FunctionStmt: public Stmt{
+    private:
+	std::vector<Token> args;
+	std::vector<TOKENTYPE> types;
+	Stmt* body;
+	TOKENTYPE return_type;
+    public:
+	FunctionStmt();
+	FunctionStmt(std::vector<Token>, Stmt*);
+	~FunctionStmt() override;
+
+	[[nodiscard]] inline std::vector<Token> get_args() const noexcept { return args; }
+	[[nodiscard]] inline std::vector<TOKENTYPE> get_types() const noexcept { return types; }
+	[[nodiscard]] inline Stmt* get_body() const noexcept { return body; }
+	[[nodiscard]] inline TOKENTYPE get_return_type() const noexcept { return return_type; }
+	[[nodiscard]] std::string to_string() const noexcept override;
+
+	inline void push_arg (Token token) noexcept { args.push_back(token); }
+	inline void push_type (TOKENTYPE type) noexcept { types.push_back(type); }
+	inline void set_body(Stmt* stmt_body) { body = stmt_body; }
+	inline void set_return_type(TOKENTYPE type) noexcept { return_type= type; }
+};
+
+class ReturnStmt: public Stmt {
+    private:
+	Expr* value;	
+    public:
+	explicit ReturnStmt(Expr*);
+	~ReturnStmt() override;
+	[[nodiscard]] inline Expr* get_expr() const noexcept { return value; };
+	[[nodiscard]] std::string to_string() const noexcept override;
+};
+
 class WhileStmt: public Stmt {
     private:
 	Expr* condition;
@@ -48,13 +81,15 @@ class BlockStmt : public Stmt {
 	[[nodiscard]] std::string to_string() const noexcept override;
 };
 
-class ExpressionStmt: public Stmt {
+class AssignmentStmt: public Stmt {
     private:
+	Token id_token;
 	Expr* expression;
     public:
-	explicit ExpressionStmt(Expr*);
-	~ExpressionStmt() override;
+	explicit AssignmentStmt(Token, Expr*);
+	~AssignmentStmt() override;
 	[[nodiscard]] Expr* get_expression() const noexcept { return expression; }
+	[[nodiscard]] Token get_id() const noexcept { return id_token; }
 	[[nodiscard]] std::string to_string() const noexcept override;
 };
 
