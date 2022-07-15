@@ -16,10 +16,12 @@ static std::string TOKENTYPE_to_str(TOKENTYPE type){
 	case DOUBLE: return "DOUBLE";
 	case BOOL: return "BOOL";
 	case STRING: return "STRING";
-	case RIGHT_PAR: return "RIGHT_PAR";
 	case LEFT_PAR: return "LEFT_PAR";
+	case RIGHT_PAR: return "RIGHT_PAR";
 	case TIMES: return "TIMES";
 	case IF: return "IF";
+	case LEFT_SQUARE: return "LEFT SQUARE";
+	case RIGHT_SQUARE: return "RIGHT SQUARE";
 	case SLASH: return "SLASH";
 	case SEMICOLON: return "SEMICOLON";
 	case ARROW : return "ARROW";

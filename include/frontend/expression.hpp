@@ -1,12 +1,25 @@
 #pragma once
 #include "frontend/token.hpp"
 #include <string>
+#include <vector>
 
 class Expr {
     public:
 	Expr();
 	virtual ~Expr() = 0;
 	[[nodiscard]] std::string virtual to_string() const = 0;
+};
+
+class CallExpr : public Expr {
+    private:
+	Expr* id_expr;
+	std::vector<Expr*> params;
+    public:
+	explicit CallExpr(Expr* name, std::vector<Expr*>);
+	~CallExpr() override;
+	[[nodiscard]] inline Expr* get_token_name() const noexcept { return id_expr; }
+	[[nodiscard]] inline std::vector<Expr*> get_params() const noexcept { return params; }
+	[[nodiscard]] std::string to_string() const noexcept override;
 };
 
 class BinaryExpr : public Expr {
@@ -93,8 +106,8 @@ class IdExpr : public Expr {
     public:
 	explicit IdExpr(Token _token);
 	~IdExpr() override;
-	inline Token get_token() const { return token; }
-	inline std::string to_string() const override {
+	inline Token get_token() const noexcept { return token; }
+	inline std::string to_string() const noexcept override {
 	    return token.get_lexeme();
 	}
 };
@@ -104,9 +117,19 @@ class GroupingExpr : public Expr {
 	Expr* expr;
     public:
 	explicit GroupingExpr(Expr* _expr);
-	~GroupingExpr();
-	inline Expr* get_expr(){ return expr; }
-	std::string to_string() const override {
+	~GroupingExpr() override;
+	[[nodiscard]] inline Expr* get_expr() const noexcept { return expr; }
+	[[nodiscard]] std::string to_string() const noexcept override {
 	    return expr -> to_string();
 	} 
+};
+
+class ListExpr: public Expr {
+    private:
+	std::vector<Expr*> values;
+    public:
+	explicit ListExpr(std::vector<Expr*>);
+	~ListExpr() override;
+	inline std::vector<Expr*> get_value(){ return values; }
+	std::string to_string() const noexcept override;
 };

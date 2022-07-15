@@ -41,7 +41,6 @@ bool static isname(char c){
 }
 
 std::vector<Token> Lexer::scan_tokens(){
-    
     while(!at_end()){
 	start = current;
 	char c_char {input_string[current]};
@@ -62,24 +61,24 @@ std::vector<Token> Lexer::scan_tokens(){
 
 		case '+': push_simple_token(PLUS); break;
 		case '"': start++;current++; push_string_token(); break;
-		case ',': push_simple_token(COMA);break;
+		case ',': push_simple_token(COMA); break;
 		case '(': push_simple_token(LEFT_PAR); break;
 		case ')': push_simple_token(RIGHT_PAR); break;
-		case '{': push_simple_token(LEFT_BRACE);break;
-		case '}': push_simple_token(RIGHT_BRACE);break;
-		case '-': push_simple_token(MINUS);break;
-		case '*': push_simple_token(TIMES);break;
-		case '/': match('/') ? push_comment_token() : push_simple_token(SLASH);break;
-		case '>': match('=') ? push_simple_token(GTE) : push_simple_token(GT);break;
-		case '<': match('=') ? push_simple_token(LTE) : push_simple_token(LT);break;
-		case '!': match('=') ? push_simple_token(NOT_EQUAL) : push_simple_token(NOT);break;
+		case '{': push_simple_token(LEFT_BRACE); break;
+		case '}': push_simple_token(RIGHT_BRACE); break;
+		case '-': push_simple_token(MINUS); break;
+		case '*': push_simple_token(TIMES); break;
+		case '!': match('=') ? push_simple_token(NOT_EQUAL) : push_simple_token(NOT); break;
+		case '/': match('/') ? push_comment_token() : push_simple_token(SLASH); break;
+		case '>': match('=') ? push_simple_token(GTE) : push_simple_token(GT); break;
+		case '<': match('=') ? push_simple_token(LTE) : push_simple_token(LT); break;
 		case '&': match('&') ? push_simple_token(AND):
 			  throw SyntaxError("missing second '&'", line, current); break;  
-
+		case '[': push_simple_token(LEFT_SQUARE); break;
+		case ']': push_simple_token(RIGHT_SQUARE); break;
 		case '|': match('|') ? push_simple_token(OR):
 			  throw SyntaxError("missing second '|'", line, current); break;  
-
-		case '%': push_simple_token(MODULO);break;
+		case '%': push_simple_token(MODULO); break;
 		default:
 			if (std::isdigit(c_char)){ push_number_token();break;}
 			if (std::isalpha(c_char) || c_char == '_'){push_id_token();break;}
@@ -89,7 +88,7 @@ std::vector<Token> Lexer::scan_tokens(){
 		lexer_errors++;
 		err.show_error();
 	}
-	    current++;
+	  current++;
     }
     return tokens;
 }

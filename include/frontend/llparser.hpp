@@ -40,6 +40,11 @@ class LLParser {
 	[[nodiscard]] Stmt* bool_declaration();
 	[[nodiscard]] Stmt* double_declaration();
 
+	[[nodiscard]] Stmt* int_list_declaration();
+	[[nodiscard]] Stmt* string_list_declaration();
+	[[nodiscard]] Stmt* bool_list_declaration();
+	[[nodiscard]] Stmt* double_list_declaration();
+
 	[[nodiscard]] Stmt* statement();
 	[[nodiscard]] Stmt* return_statement();
 	[[nodiscard]] Stmt* fun_statement();
@@ -47,6 +52,8 @@ class LLParser {
 	[[nodiscard]] Stmt* if_statement();
 	[[nodiscard]] Stmt* block();
 	[[nodiscard]] Stmt* assignment_statement();
+	[[nodiscard]] Stmt* call_stmt();
+	[[nodiscard]] Stmt* expr_stmt();
 
 	[[nodiscard]] Expr* expression();
 	[[nodiscard]] Expr* assignment();
@@ -58,9 +65,10 @@ class LLParser {
 	[[nodiscard]] Expr* factor();
 	[[nodiscard]] Expr* unary();
 	[[nodiscard]] Expr* primary();
+	[[nodiscard]] Expr* call_expr();
 	
 	void fun_args(FunctionStmt*); 
-
+	[[nodiscard]] TOKENTYPE resolve_type();
 	[[nodiscard]] inline Token current_token() const noexcept { return tokens[current]; }
 	[[nodiscard]] inline Token previous_token() const noexcept { return tokens[current - 1]; }
 	[[nodiscard]] inline TOKENTYPE get_token_type(size_t current_pos) const noexcept

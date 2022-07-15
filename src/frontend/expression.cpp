@@ -4,6 +4,30 @@
 Expr::Expr(){ }
 Expr::~Expr() { }
 
+CallExpr::CallExpr(Expr* id, std::vector<Expr*> p):id_expr(id), params(p) { }
+CallExpr::~CallExpr() {
+    if (id_expr != nullptr){
+	delete id_expr; id_expr = nullptr;
+    }
+
+    for (auto& expr: params){
+	if (expr != nullptr){
+	    delete expr;
+	    expr = nullptr;
+	}
+    }
+}
+
+std::string CallExpr::to_string() const noexcept{
+    std::string stri = id_expr->to_string() + "(";
+    for (auto& expr: params){
+	if (expr != nullptr){
+	    stri += expr->to_string() + " ";
+	}
+    }
+    return stri + ");";
+}
+
 BinaryExpr::BinaryExpr(Token _op, Expr* _left, Expr* _right)
     : left(_left), right(_right), op(_op) {};
 
@@ -89,4 +113,24 @@ GroupingExpr::GroupingExpr(Expr* _expr): expr(_expr){}
 GroupingExpr::~GroupingExpr(){
     if (expr) delete expr;
     expr = nullptr;
+}
+
+ListExpr::ListExpr(std::vector<Expr*> val): values(val) { }
+ListExpr::~ListExpr(){
+    for (auto& ex: values){
+	if (ex != nullptr){
+	    delete ex;
+	    ex = nullptr;
+	}
+    }
+}
+
+std::string ListExpr::to_string() const noexcept {
+    std::string stry = "[";
+    for (auto& ex: values){
+	if (ex != nullptr) {
+	    stry += ex->to_string() + " ";
+	}
+    }
+    return stry + "]";
 }
