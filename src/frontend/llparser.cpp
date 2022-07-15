@@ -362,7 +362,30 @@ Stmt* LLParser::assignment_statement(){
 /********************************************/
 
 Expr* LLParser::expression(){
-    return equality();
+    return or_expr();
+}
+
+Expr* LLParser::or_expr(){
+    Expr* left = and_expr(); 
+    while(match(OR)){
+	Token op = current_token();
+	advance();
+	Expr* right = and_expr();	
+	left = new BinaryExpr(op, left, right);
+    }
+    return left;
+}
+
+
+Expr* LLParser::and_expr(){
+    Expr* left = equality(); 
+    while(match(AND)){
+	Token op = current_token();
+	advance();
+	Expr* right = equality();	
+	left = new BinaryExpr(op, left, right);
+    }
+    return left;
 }
 
 Expr* LLParser::equality(){
@@ -377,37 +400,17 @@ Expr* LLParser::equality(){
 }
 
 Expr* LLParser::comparison(){
-    Expr* left = or_expr();
+    Expr* left = term();
     while(match({GT, GTE, LT, LTE})){
 	Token op = current_token();
 	advance(); 	
-	Expr* right = or_expr();
+	Expr* right = term();
 	left = new BinaryExpr(op, left, right);	
     }
     return left;
 }
 
-Expr* LLParser::or_expr(){
-    Expr* left = and_expr(); 
-    while(match(OR)){
-	Token op = current_token();
-	advance();
-	Expr* right = and_expr();	
-	left = new BinaryExpr(op, left, right);
-    }
-    return left;
-}
 
-Expr* LLParser::and_expr(){
-    Expr* left = term(); 
-    while(match(AND)){
-	Token op = current_token();
-	advance();
-	Expr* right = term();	
-	left = new BinaryExpr(op, left, right);
-    }
-    return left;
-}
 
 Expr* LLParser::term(){
     Expr* left = factor();
